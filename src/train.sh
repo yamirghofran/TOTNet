@@ -1,15 +1,16 @@
 #!/bin/bash
 #SBATCH --partition=gpu
-#SBATCH --gres=gpu:1
+#SBATCH --gres=gpu:a100:1
 #SBATCH --job-name=Aug_occl
+#SBATCH --cpus-per-task=10
 
 nvidia-smi
 export NCCL_P2P_DISABLE=1
-SAVE_FOLDER='TOTNet_Tennis_(5)_(288,512)_30epochs_Occl(0.25)_WBCE[1,2,3,3]_bs8_ch64'
+SAVE_FOLDER='TOTNet_TTA_(5)_(288,512)_30epochs_Occl(0.25)_WBCE[1,2,3,3]_bs8_ch64'
 NUM_FRAMES=5
 BATCH_SIZE=8
 MODEL_CHOICE='TOTNet'
-DATASET_CHOICE='tennis'
+DATASET_CHOICE='tta'
 NUM_CHANNELS=64
 
 
