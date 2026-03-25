@@ -63,15 +63,23 @@ def post_process(coords_logits):
     return torch.stack([x_coord_pred, y_coord_pred], dim=1)
 
 
-def load_pretrained_model(model, pretrained_path, gpu_idx):
-    """Load weights from the pretrained model"""
+def load_pretrained_model(model, pretrained_path, device):
+    """Load weights from the pretrained model
+    
+    Args:
+        model: The model to load weights into
+        pretrained_path: Path to the checkpoint file
+        device: torch.device object (e.g., 'cuda:0', 'mps', 'cpu') or int for GPU index (deprecated)
+    """
     assert os.path.isfile(pretrained_path), "=> no checkpoint found at '{}'".format(pretrained_path)
-    if gpu_idx is None:
-        checkpoint = torch.load(pretrained_path, map_location='cpu')
+    
+    # Handle both device object and legacy gpu_idx int
+    if isinstance(device, int):
+        loc = 'cuda:{}'.format(device)
     else:
-        # Map model to be loaded to specified single gpu.
-        loc = 'cuda:{}'.format(gpu_idx)
-        checkpoint = torch.load(pretrained_path, map_location=loc)
+        loc = str(device)
+    
+    checkpoint = torch.load(pretrained_path, map_location=loc, weights_only=False)
     pretrained_dict = checkpoint['state_dict']
     
     if hasattr(model, 'module'):
