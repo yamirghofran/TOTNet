@@ -44,10 +44,17 @@ def main():
         warnings.warn('You have chosen a specific GPU. This will completely '
                       'disable data parallelism.')
 
+    # Check if running in distributed mode (environment variables set)
     if configs.dist_url == "env://" and configs.world_size == -1:
-        configs.world_size = int(os.environ["WORLD_SIZE"])
-
-    configs.distributed = configs.world_size > 1 or configs.multiprocessing_distributed
+        if 'WORLD_SIZE' in os.environ:
+            configs.world_size = int(os.environ["WORLD_SIZE"])
+            configs.distributed = True
+        else:
+            # Single GPU mode
+            configs.world_size = 1
+            configs.distributed = False
+    else:
+        configs.distributed = configs.world_size > 1 or configs.multiprocessing_distributed
 
     main_worker(configs)
 
@@ -55,13 +62,24 @@ def main():
 
 def main_worker(configs):
 
-    configs.rank = int(os.environ["RANK"])
-    configs.world_size = int(os.environ["WORLD_SIZE"])
+    # Handle single GPU (non-distributed) vs distributed training
+    if 'RANK' in os.environ and 'WORLD_SIZE' in os.environ:
+        configs.rank = int(os.environ["RANK"])
+        configs.world_size = int(os.environ["WORLD_SIZE"])
+        configs.gpu_idx = int(os.environ.get("LOCAL_RANK", 0))
+        configs.distributed = configs.world_size > 1
+    else:
+        # Single GPU mode
+        configs.rank = 0
+        configs.world_size = 1
+        configs.gpu_idx = 0
+        configs.distributed = False
+
     # Set the GPU for this process
-    configs.gpu_idx = int(os.environ["LOCAL_RANK"])  # Rank within the current node
     configs.device = torch.device(f'cuda:{configs.gpu_idx}')
 
     print(f"Running on rank {configs.rank}, using GPU {configs.gpu_idx}")
+    print(f"Distributed: {configs.distributed}, World size: {configs.world_size}")
 
     if configs.gpu_idx is not None:
         print("Use GPU: {} for training".format(configs.gpu_idx))

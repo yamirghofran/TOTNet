@@ -1,14 +1,32 @@
-torch==2.4.1 --index-url https://download.pytorch.org/whl/cu118
-torchvision==0.19.1 --index-url https://download.pytorch.org/whl/cu118
-torchaudio==2.4.1 --index-url https://download.pytorch.org/whl/cu118
-easydict==1.13
-matplotlib==3.9.2
-opencv-python==4.10.0.84
-scikit-learn
-cython
-pycocotools
-tqdm
-scipy
-ninja
-tensorboard
-ptflops
+# TOTNet Dependencies
+# ===================
+# Install with: pip install -r requirements.txt
+# Or with uv: uv sync
+
+# Core ML - PyTorch (CUDA 11.8+)
+torch>=2.0.0
+torchvision>=0.15.0
+torchaudio>=2.0.0
+
+# Data processing
+numpy>=1.20.0
+opencv-python>=4.5.0
+scipy>=1.7.0
+scikit-learn>=1.0.0
+pillow>=9.0.0
+
+# Utilities
+typing_extensions>=4.0.0
+easydict>=1.13
+matplotlib>=3.5.0
+tqdm>=4.60.0
+tensorboard>=2.8.0
+ptflops>=0.7.0
+
+# Config
+pyyaml>=6.0.0
+
+# Optional (for COCO evaluation)
+cython>=3.0.0
+pycocotools>=2.0.0
+ninja>=1.11.0

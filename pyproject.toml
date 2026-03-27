@@ -1,0 +1,41 @@
+[project]
+name = "tot-net"
+version = "0.1.0"
+description = "TOTNet - Ball Tracking with Temporal Context"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    # Core ML - PyTorch
+    "torch>=2.0.0",
+    "torchvision>=0.15.0",
+    "torchaudio>=2.0.0",
+    # Data processing
+    "numpy>=1.20.0",
+    "opencv-python>=4.5.0",
+    "scipy>=1.7.0",
+    "scikit-learn>=1.0.0",
+    "pillow>=9.0.0",
+    # Utilities
+    "easydict>=1.13",
+    "matplotlib>=3.5.0",
+    "tqdm>=4.60.0",
+    "tensorboard>=2.8.0",
+    "ptflops>=0.7.0",
+    # Config
+    "pyyaml>=6.0.0",
+    "einops>=0.8.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "cython>=3.0.0",
+    "pycocotools>=2.0.0",
+    "ninja>=1.11.0",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

@@ -6,12 +6,15 @@ import sys
 from easydict import EasyDict as edict
 from utils.misc import make_folder
 
+# Get the project root directory (3 levels up from this config file)
+_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+
 def parse_configs():
     parser = argparse.ArgumentParser(description='PIDA')
     parser.add_argument('--seed', type=int, default=2024,
                     help='re-produce the results with seed random')
-    parser.add_argument('--working-dir', type=str, default='../', metavar='PATH',
-                        help='the ROOT working directory')
+    parser.add_argument('--working-dir', type=str, default=None, metavar='PATH',
+                        help='the ROOT working directory (default: auto-detect project root)')
     parser.add_argument('--saved_fn', type=str, default='logs', metavar='FN',
                         help='The name using for saving logs, models,...')
     parser.add_argument('--no_val', action='store_true',
@@ -124,7 +127,9 @@ def parse_configs():
     parser.add_argument('--ball_size', type=int, default=5, metavar='N',
                         help='ball size to determine percision recall and f1 socre')
     parser.add_argument('--dataset_choice', type=str, default='tt', metavar='DC',
-                        help='which dataset to use tt for table tennis, tennis for tennis')
+                        help='which dataset to use tt for table tennis, tennis for tennis, football for football')
+    parser.add_argument('--football_dataset_dir', type=str, default=None, metavar='PATH',
+                        help='Path to football dataset (default: <project_root>/data/football_dataset)')
     parser.add_argument('--event', action='store_true',
                         help='If true, use event dataset, which is only available in tt dataset! ')
     parser.add_argument('--mimo', action='store_true',
@@ -171,6 +176,14 @@ def parse_configs():
                              'multi node data parallel training')
 
     configs = edict(vars(parser.parse_args()))
+    
+    # Compute project root directory (3 levels up from this config file)
+    _project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    
+    # Set working_dir to project root if not specified
+    if configs.working_dir is None or configs.working_dir == '../':
+        configs.working_dir = _project_root
+    
     ####################################################################
     ############## Hardware configurations ############################
     ####################################################################
@@ -224,6 +237,13 @@ def parse_configs():
     configs.tta_test_match_list = ['24Paralympics_FRA_M4_Addis_AUS_v_Chaiwut_THA']
 
     configs.tta_tracking_dataset_dir = os.path.join('/home/s224705071/github/PhysicsInformedDeformableAttentionNetwork/data/tta_tracking')
+
+    ###################################################################
+    ##############          Football dataset
+    ####################
+    # Allow override via command line or use absolute path based on project root
+    if not hasattr(configs, 'football_dataset_dir') or configs.football_dataset_dir is None:
+        configs.football_dataset_dir = os.path.join(_project_root, 'data', 'football_dataset')
 
     make_folder(configs.checkpoints_dir)
     make_folder(configs.logs_dir)

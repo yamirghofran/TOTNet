@@ -17,7 +17,8 @@ from data_process.data_utils import (
     get_all_detection_infor_tennis,
     get_events_infor_noseg,
     get_all_detection_infor_badminton,
-    get_new_tracking_infor
+    get_new_tracking_infor,
+    get_all_detection_infor_football
 )
 
 
@@ -51,6 +52,9 @@ def create_occlusion_train_val_dataloader(configs, subset_size=None, necessary_p
         train_dataset = Badminton_Dataset(train_events_infor, train_events_label, transform=train_transform,
                                     num_samples=configs.num_samples)
     elif configs.dataset_choice == 'tta':
+        train_dataset = TTA_Dataset(train_events_infor, train_events_label, transform=train_transform,
+                                    num_samples=configs.num_samples)
+    elif configs.dataset_choice == 'football':
         train_dataset = TTA_Dataset(train_events_infor, train_events_label, transform=train_transform,
                                     num_samples=configs.num_samples)
     # If subset_size is provided, create a subset for training
@@ -87,6 +91,9 @@ def create_occlusion_train_val_dataloader(configs, subset_size=None, necessary_p
             val_dataset = Badminton_Dataset(val_events_infor, val_events_label, transform=val_transform,
                                         num_samples=configs.num_samples)
         elif configs.dataset_choice == 'tta':
+            val_dataset = TTA_Dataset(val_events_infor, val_events_label, transform=val_transform,
+                                        num_samples=configs.num_samples)
+        elif configs.dataset_choice == 'football':
             val_dataset = TTA_Dataset(val_events_infor, val_events_label, transform=val_transform,
                                         num_samples=configs.num_samples)
 
@@ -135,6 +142,15 @@ def create_occlusion_test_dataloader(configs, subset_size=None):
                                  num_samples=configs.num_samples)
     elif configs.dataset_choice == 'tta':
         test_events_infor, test_events_labels = get_new_tracking_infor(configs.tta_tracking_dataset_dir, 'test', num_frames=configs.num_frames, resize=configs.resize, bidirect=configs.bidirect)
+        test_dataset = TTA_Dataset(test_events_infor, test_events_labels, transform=test_transform,
+                                num_samples=configs.num_samples)
+    elif configs.dataset_choice == 'football':
+        test_events_infor, test_events_labels = get_all_detection_infor_football(
+            configs.football_dataset_dir, 'test', 
+            num_frames=configs.num_frames, 
+            resize=configs.resize, 
+            bidirect=configs.bidirect
+        )
         test_dataset = TTA_Dataset(test_events_infor, test_events_labels, transform=test_transform,
                                 num_samples=configs.num_samples)
     test_sampler = None

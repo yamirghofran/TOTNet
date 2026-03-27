@@ -98,10 +98,21 @@ def reduce_tensor(tensor, world_size):
     return rt
 
 def to_python_float(t):
-    if hasattr(t, 'item'):
+    """Convert tensor or other value to Python float.
+    
+    Handles:
+    - PyTorch tensors (uses .item())
+    - Lists/tuples (takes first element)
+    - Already a float/int (returns as-is)
+    """
+    if isinstance(t, (float, int)):
+        return float(t)
+    elif hasattr(t, 'item'):
         return t.item()
+    elif isinstance(t, (list, tuple)) and len(t) > 0:
+        return float(t[0])
     else:
-        return t[0]
+        return float(t)
     
 
 def benchmark_fps(model, batch_data, device="cuda", num_warmup=10, num_iters=30):

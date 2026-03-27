@@ -60,7 +60,8 @@ class Video_Loader:
         while self.count < self.num_frames_sequence:
             self.count += 1
             ret, frame = self.cap.read()  # BGR
-            assert ret, f'Failed to load frame {self.count}'
+            if not ret:
+                raise ValueError(f'Video too short: Failed to load frame {self.count}, need at least {self.num_frames_sequence} frames')
             
             # Resize, convert to RGB, and normalize
             frame = cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), (self.width, self.height))
@@ -78,7 +79,9 @@ class Video_Loader:
 
         # Read the next frame
         ret, frame = self.cap.read()  # BGR
-        assert ret, f'Failed to load frame {self.count}'
+        if not ret:
+            print(f'Warning: Failed to load frame {self.count}, stopping at frame {self.count - 1}')
+            raise StopIteration
 
         # Resize, convert to RGB, and normalize
         original_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -140,7 +143,8 @@ class Video_Loader_MIMO:
         while self.count < self.num_frames_sequence:
             self.count += 1
             ret, frame = self.cap.read()  # BGR
-            assert ret, f'Failed to load frame {self.count}'
+            if not ret:
+                raise ValueError(f'Video too short: Failed to load frame {self.count}, need at least {self.num_frames_sequence} frames')
             
             # Resize, convert to RGB, and normalize
             frame = cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), (self.width, self.height))
@@ -161,7 +165,9 @@ class Video_Loader_MIMO:
         for i in range(self.num_frames_sequence):
             # Read the next frame
             ret, frame = self.cap.read()  # BGR
-            assert ret, f'Failed to load frame {self.count}'
+            if not ret:
+                print(f'Warning: Failed to load frame {self.count}, stopping at frame {self.count - 1}')
+                raise StopIteration
             
             # Resize, convert to RGB, and normalize
             frame = cv2.resize(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB), (self.width, self.height))

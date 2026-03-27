@@ -658,6 +658,91 @@ def get_new_tracking_infor(dataset_dir, dataset_type, num_frames=5, resize=None,
     return events_infor, events_labels
 
 
+def get_all_detection_infor_football(dataset_dir, dataset_type, num_frames=5, resize=None, bidirect=False):
+    """Load football dataset annotations in TOTNet format.
+    
+    Args:
+        dataset_dir: Path to football_dataset directory
+        dataset_type: 'train' or 'test'
+        num_frames: Number of frames per sequence (default: 5)
+        resize: Optional (height, width) tuple for coordinate scaling
+        bidirect: If True, target frame is middle; if False, target is last
+    
+    Returns:
+        events_infor: List of image path lists
+        events_labels: List of [ball_position, visibility, status]
+    """
+    if dataset_type == 'train':
+        annos_file = os.path.join(dataset_dir, 'train.json')
+    else:
+        annos_file = os.path.join(dataset_dir, 'test.json')
+    
+    if not os.path.exists(annos_file):
+        raise FileNotFoundError(f"Annotation file not found: {annos_file}")
+    
+    with open(annos_file, 'r') as f:
+        annos = json.load(f)
+    
+    status = 1  # Default status (not used for football, but required by dataset)
+    events_infor = []
+    events_labels = []
+    
+    for video in annos:
+        video_name = video['video']
+        img_width = video['width']
+        img_height = video['height']
+        images_dir = os.path.join(dataset_dir, 'frames', video_name)
+        
+        # Build frame to ball position mapping
+        frame_to_ball = {}
+        for bp in video['ball_pos']:
+            frame_to_ball[bp['frame']] = bp
+        
+        # Get all frames and sort them
+        all_frames = sorted(frame_to_ball.keys())
+        
+        # Generate sequences using sliding window
+        for i in range(len(all_frames) - num_frames + 1):
+            sequence_frames = all_frames[i:i + num_frames]
+            
+            # Build image paths
+            img_path_list = []
+            for frame_num in sequence_frames:
+                img_path = os.path.join(images_dir, f'img_{frame_num:06d}.jpg')
+                img_path_list.append(img_path)
+            
+            # Get target frame (last or middle depending on bidirect)
+            if bidirect:
+                target_idx = num_frames // 2
+            else:
+                target_idx = num_frames - 1
+            
+            target_frame = sequence_frames[target_idx]
+            ball_info = frame_to_ball.get(target_frame)
+            
+            if ball_info is None:
+                continue
+            
+            # Scale coordinates if resize is specified
+            x = ball_info['ball_x']
+            y = ball_info['ball_y']
+            
+            if x is not None and y is not None and resize is not None:
+                # resize is (height, width), img dimensions are (width, height)
+                x = int(x * (resize[1] / img_width))
+                y = int(y * (resize[0] / img_height))
+            elif x is not None and y is not None:
+                x = int(x)
+                y = int(y)
+            
+            ball_position = np.array([x, y], dtype=int) if x is not None else np.array([-1, -1], dtype=int)
+            visibility = ball_info.get('visibility', 1)
+            
+            events_infor.append(img_path_list)
+            events_labels.append([ball_position, visibility, status])
+    
+    return events_infor, events_labels
+
 
 def get_all_detection_infor_tta(configs, dataset_type):
     num_frames = configs.num_frames - 1
@@ -823,6 +908,25 @@ def train_val_data_separation(configs):
                                                                                                             )
     elif configs.dataset_choice == 'tta':
         events_infor, events_labels = get_new_tracking_infor(configs.tta_tracking_dataset_dir, 'train', num_frames=configs.num_frames, resize=configs.resize, bidirect=configs.bidirect)
+        if configs.no_val:
+            train_events_infor = events_infor
+            train_events_labels = events_labels
+            val_events_infor = None
+            val_events_labels = None
+        else:
+            train_events_infor, val_events_infor, train_events_labels, val_events_labels = train_test_split(events_infor,
+                                                                                                            events_labels,
+                                                                                                            shuffle=True,
+                                                                                                            test_size=configs.val_size,
+                                                                                                            random_state=configs.seed,
+                                                                                                            )
+    elif configs.dataset_choice == 'football':
+        events_infor, events_labels = get_all_detection_infor_football(
+            configs.football_dataset_dir, 'train', 
+            num_frames=configs.num_frames, 
+            resize=configs.resize, 
+            bidirect=configs.bidirect
+        )
         if configs.no_val:
             train_events_infor = events_infor
             train_events_labels = events_labels
