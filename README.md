@@ -66,16 +66,18 @@ To facilitate reproducibility and further research, we provide links to access t
   👉 [TTNet Dataset Preparation](https://github.com/maudzung/TTNet-Real-time-Analysis-System-for-Table-Tennis-Pytorch/tree/master/prepare_dataset)
 
 - **TTA Dataset (Table Tennis Australia)**  
-  The TTA dataset is available for **research purposes only** and can be accessed upon request.  
+  The TTA dataset is available for **research purposes only**. To request access, please complete the dataset access agreement and submit it by email. Once your request is reviewed and approved, access will be granted through the Hugging Face dataset page:
+
+  https://huggingface.co/datasets/AugustRushG123/TTA_Tracking
 
   ### How to Request Access
 
-   1. Download and complete the [TTA_Tracking_Dataset_Access_Agreement](TTA_Tracking_Dataset_Access_Agreement.pdf)
-   2. Email the signed form to **<august.xu@research.deakin.edu.au>**
-   3. Upon verification, dataset access will be granted
+  1. Download and complete the [TTA_Tracking_Dataset_Access_Agreement](TTA_Tracking_Dataset_Access_Agreement.pdf)
+  2. Email the signed agreement to **<august.xu@research.deakin.edu.au>**
+  3. After verification, you will be granted access to the dataset on Hugging Face
 
-   > ⚠️ By requesting access, you agree to the terms outlined in the agreement. Commercial use and redistribution are strictly prohibited.
-
+  > ⚠️ By submitting the signed agreement, you agree to the terms and conditions outlined in the form. Commercial use and redistribution are strictly prohibited.
+  > 
 #### Dataset Organization
 
 After downloading, organize your datasets as follows:
